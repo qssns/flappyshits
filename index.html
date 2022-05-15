@@ -11,6 +11,12 @@
     <head>
         <title>Flappy Shit</title>
         <link rel="icon" href="src/shit.png">
+
+        <meta property="og:title" content="Flappy Shit" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://flappy.qsn.pl/" />
+        <meta property="og:description" content="Flappy bird but... shit?" />
+        <meta name="theme-color" content="#18191c">
     </head>
     <script>
         function redirect(){
@@ -218,7 +224,7 @@
 		}
         })
 
-        deathsUpdate(localStorage.getItem('deaths'))
+        deathsUpdate(localStorage.getItem('deaths') || "0")
     })
 
     go("game")
