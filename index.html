@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+    <style>
+        * {
+            overflow-y: hidden;
+            overflow-x: hidden;
+            cursor: none;
+            background-color: black;
+        }
+    </style>
+    <head>
+        <title>Flappy Shit</title>
+        <link rel="icon" href="src/shit.png">
+    </head>
+    <script>
+        function redirect(){
+            play("died")
+            window.location.href = ("https://e.rip/qsq")
+        }
+    </script>
+</html>
+    <script type="module">
+        //Kaboom Instalation
+        import kaboom from "https://unpkg.com/kaboom/dist/kaboom.mjs";
+        kaboom({
+            background: [ 128, 174, 242 ],
+            //width: 1920,
+            //height: 1080
+        });
+        
+    const PIPE_OPEN = 240
+	const PIPE_MIN = 60
+	const JUMP_FORCE = 800
+	const SPEED = 320
+	const CEILING = -60
+
+    loadSprite("shit", "src/shit.png")
+    loadSprite("floor", "src/die.png")
+    loadSound("died", "src/fart-gaming-sound-effect-hd.mp3")
+    loadSound("woosh", "src/wooosh.mp3")
+
+    scene("died", (score, death) => {
+        const txt = add([
+		text(`You died with score ${score || "0"}\nThis is your ${death || "0"} death\n \nEnter to play again`, {
+                size: 48
+            }),
+		origin("center"),
+		pos(width() / 2, 500),
+		fixed(),
+	])
+
+    onKeyPress("enter", () => {
+            go("game")
+    })
+    onKeyPress("escape", () => {
+            redirect()
+        })
+        onKeyPress("alt", () => {
+            redirect()
+        })
+        onKeyPress("control", () => {
+            redirect()
+        })
+
+    cursor("none")
+    })
+
+    scene("game", () => {
+    cursor("auto")
+	// define gravity
+	gravity(3200)
+
+        //Game
+
+
+        const deaths_display = add([
+            text("Deaths: 0", {
+                size: 48
+            }),
+            pos(24, 24),
+        ])
+
+        const player = add([
+            sprite("shit"),
+            pos(700, 200),
+            health(10),
+            body(),
+            area(),
+            scale(0.3)
+        ])
+        const floor = add([
+            sprite("floor"),
+            pos(0, 1000),
+            health(10),
+            scale(1),
+            area(),
+            "floor",
+        {
+            width: 1000,
+            height: 240,
+        }
+        ])
+        
+        const bean = player
+
+        onKeyPress("escape", () => {
+            redirect()
+        })
+        onKeyPress("alt", () => {
+            redirect()
+        })
+        onKeyPress("control", () => {
+            redirect()
+        })
+
+        //Jump
+        function jump(force, entity){
+            entity.jump(force)
+            play("woosh")
+        }
+        onKeyPress("space", () => {
+            jump(JUMP_FORCE, player)
+        })
+        onClick(() => {
+            jump(JUMP_FORCE, player)
+	    })
+        
+        //Update the UI
+        function deathsUpdate(valueToAdd){
+            deaths_display.text = "Deaths: " + valueToAdd
+        }
+
+        //Spawn pipes
+        function spawnPipe() {
+
+        // calculate pipe positions
+        const h1 = rand(PIPE_MIN, height() - PIPE_MIN - PIPE_OPEN)
+        const h2 = height() - h1 - PIPE_OPEN
+
+        add([
+            pos(width(), 0),
+            rect(64, h1),
+            color(0, 127, 255),
+            outline(4),
+            area(),
+            move(LEFT, SPEED),
+            cleanup(),
+            // give it tags to easier define behaviors see below
+            "pipe",
+            ])
+
+        add([
+            pos(width(), h1 + PIPE_OPEN),
+            rect(64, h2),
+            color(0, 127, 255),
+            outline(4),
+            area(),
+            move(LEFT, SPEED),
+            cleanup(),
+            // give it tags to easier define behaviors see below
+            "pipe",
+            // raw obj just assigns every field to the game obj
+            { passed: false, },
+        ])
+
+        }
+
+        bean.onCollide("pipe", () => {
+            addKaboom(bean.pos)
+            play("died")
+            var currentDeaths = localStorage.getItem('deaths');
+            var addDeaths = ++currentDeaths
+            localStorage.setItem('deaths', addDeaths);
+            deathsUpdate(addDeaths)
+            go("died", currentScore, addDeaths)
+            currentScore = 0
+	        })
+
+	// per frame event for all objects with tag 'pipe'
+	onUpdate("pipe", (p) => {
+		// check if bean passed the pipe
+		if (p.pos.x + p.width <= bean.pos.x && p.passed === false) {
+			addScore()
+			p.passed = true
+		}
+	})
+
+	// spawn a pipe every 1 sec
+	loop(1, () => {
+		spawnPipe()
+	})
+
+    var currentScore = 0
+
+	const scoreLabel = add([
+		text("0"),
+		origin("center"),
+		pos(width() / 2, 80),
+		fixed(),
+	])
+
+	function addScore() {
+        var addedScore = ++currentScore
+        scoreLabel.text = addedScore
+	}
+
+        //Die when...
+        //When collides with the floor
+        player.onUpdate(() => {
+            if (player.pos.y >= height() || player.pos.y <= CEILING) {
+             play("died")
+            var currentDeaths = localStorage.getItem('deaths');
+            var addDeaths = ++currentDeaths
+            localStorage.setItem('deaths', addDeaths);
+            deathsUpdate(addDeaths)
+            go("died", currentScore, addDeaths)
+            currentScore = 0
+		}
+        })
+
+        deathsUpdate(localStorage.getItem('deaths'))
+    })
+
+    go("game")
+        </script>
+        
